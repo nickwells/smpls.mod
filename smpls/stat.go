@@ -24,8 +24,8 @@ const (
 type discardType int
 
 const (
-	DropFromStart discardType = iota
-	DropFromEnd
+	dropFromStart discardType = iota
+	dropFromEnd
 )
 
 // Stat records statistics
@@ -281,10 +281,10 @@ func (s *Stat) Add(v float64) {
 		sort.Float64s(s.maxs)
 	} else {
 		if v < s.mins[maxIdx] { // smaller than the largest min value
-			insert(v, s.mins, DropFromEnd)
+			insert(v, s.mins, dropFromEnd)
 		}
 		if v > s.maxs[0] { // larger than the smallest max value
-			insert(v, s.maxs, DropFromStart)
+			insert(v, s.maxs, dropFromStart)
 		}
 	}
 
@@ -342,7 +342,7 @@ func insert(v float64, vals []float64, discard discardType) {
 	var i int
 	var cmp float64
 
-	if discard == DropFromEnd {
+	if discard == dropFromEnd {
 		for i, cmp = range vals {
 			if cmp >= v {
 				break
@@ -352,7 +352,7 @@ func insert(v float64, vals []float64, discard discardType) {
 		if i+1 < len(vals) {
 			copy(vals[i+1:], vals[i:len(vals)-1])
 		}
-	} else if discard == DropFromStart {
+	} else if discard == dropFromStart {
 		for i = len(vals) - 1; i > 0; i-- {
 			if vals[i] < v {
 				break

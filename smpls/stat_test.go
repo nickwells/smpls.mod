@@ -238,42 +238,42 @@ func TestInsert(t *testing.T) {
 			ID:      testhelper.MkID("less than the biggest - min vals"),
 			v:       1.23,
 			vals:    []float64{1.1, 1.2, 1.3},
-			discard: DropFromEnd,
+			discard: dropFromEnd,
 			expVals: []float64{1.1, 1.2, 1.23},
 		},
 		{
 			ID:      testhelper.MkID("less than the smallest - min vals"),
 			v:       1.0,
 			vals:    []float64{1.1, 1.2, 1.3},
-			discard: DropFromEnd,
+			discard: dropFromEnd,
 			expVals: []float64{1.0, 1.1, 1.2},
 		},
 		{
 			ID:      testhelper.MkID("less than the 2nd smallest - min vals"),
 			v:       1.11,
 			vals:    []float64{1.1, 1.2, 1.3},
-			discard: DropFromEnd,
+			discard: dropFromEnd,
 			expVals: []float64{1.1, 1.11, 1.2},
 		},
 		{
 			ID:      testhelper.MkID("bigger than the biggest - max vals"),
 			v:       1.4,
 			vals:    []float64{1.1, 1.2, 1.3},
-			discard: DropFromStart,
+			discard: dropFromStart,
 			expVals: []float64{1.2, 1.3, 1.4},
 		},
 		{
 			ID:      testhelper.MkID("bigger than the smallest - max vals"),
 			v:       1.11,
 			vals:    []float64{1.1, 1.2, 1.3},
-			discard: DropFromStart,
+			discard: dropFromStart,
 			expVals: []float64{1.11, 1.2, 1.3},
 		},
 		{
 			ID:      testhelper.MkID("bigger than the 2nd biggest - max vals"),
 			v:       1.21,
 			vals:    []float64{1.1, 1.2, 1.3},
-			discard: DropFromStart,
+			discard: dropFromStart,
 			expVals: []float64{1.2, 1.21, 1.3},
 		},
 	}
@@ -285,7 +285,7 @@ func TestInsert(t *testing.T) {
 		if floatSliceDiffers(tc.vals, tc.expVals) {
 			t.Log(tc.IDStr())
 			t.Logf("\t: inserting %g into %v\n", tc.v, initVals)
-			if tc.discard == DropFromEnd {
+			if tc.discard == dropFromEnd {
 				t.Log("\t\tDiscarding from the end\n")
 			} else {
 				t.Log("\t\tDiscarding from the start\n")
