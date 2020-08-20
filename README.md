@@ -1,0 +1,2 @@
+# smpls.mod
+simple statistics
