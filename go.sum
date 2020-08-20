@@ -1,0 +1,4 @@
+github.com/nickwells/golem v0.0.0-20181227145228-9d7fbf6093ba h1:yLtjs9CEmci7FrEn0aIwY7BxbbD9L9PhAxOjlPe5bDE=
+github.com/nickwells/golem v0.0.0-20181227145228-9d7fbf6093ba/go.mod h1:OxjxsAebhh/uTxRYla2QY99AT5bE+XwhS+LJCUVmB+I=
+github.com/nickwells/testhelper.mod v1.4.1 h1:bpd/G2oBzfDOY22eineHAhOMrAmZo3Q80P3gA+Wkz+c=
+github.com/nickwells/testhelper.mod v1.4.1/go.mod h1:Ct/U2PjL0n9hGc+US6uR/s4NxSRI33NM+0ZkrDkG0XI=
