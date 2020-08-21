@@ -3,7 +3,6 @@ package smpls
 import (
 	"testing"
 
-	"github.com/nickwells/golem/mathutil"
 	"github.com/nickwells/testhelper.mod/testhelper"
 )
 
@@ -56,48 +55,15 @@ func TestStat(t *testing.T) {
 			s.Add(val)
 		}
 		min, meanMin, avg, sd, max, meanMax, count := s.Vals()
-		if min != tc.expMin {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected min: %10.5f\n", tc.expMin)
-			t.Logf("\t:   actual min: %10.5f\n", min)
-			t.Errorf("\t: min is incorrect\n")
-		}
-		if meanMin != tc.expMeanMin {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected mean min: %10.5f\n", tc.expMeanMin)
-			t.Logf("\t:   actual mean min: %10.5f\n", meanMin)
-			t.Errorf("\t: mean min is incorrect\n")
-		}
-		if avg != tc.expAvg {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected avg: %10.5f\n", tc.expAvg)
-			t.Logf("\t:   actual avg: %10.5f\n", avg)
-			t.Errorf("\t: avg is incorrect\n")
-		}
-		if !mathutil.AlmostEqual(sd, tc.expSD, 0.00001) {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected sd: %10.5f\n", tc.expSD)
-			t.Logf("\t:   actual sd: %10.5f\n", sd)
-			t.Errorf("\t: sd is incorrect\n")
-		}
-		if max != tc.expMax {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected max: %10.5f\n", tc.expMax)
-			t.Logf("\t:   actual max: %10.5f\n", max)
-			t.Errorf("\t: max is incorrect\n")
-		}
-		if meanMax != tc.expMeanMax {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected mean max: %10.5f\n", tc.expMeanMax)
-			t.Logf("\t:   actual mean max: %10.5f\n", meanMax)
-			t.Errorf("\t: mean max is incorrect\n")
-		}
-		if count != len(tc.values) {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected count: %3d\n", len(tc.values))
-			t.Logf("\t:   actual count: %3d\n", count)
-			t.Errorf("\t: count is incorrect\n")
-		}
+		testhelper.CmpValFloat64(t, tc.IDStr(), "min", min, tc.expMin, 0.0)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "mean min",
+			meanMin, tc.expMeanMin, 0.0)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "avg", avg, tc.expAvg, 0.0)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "sd", sd, tc.expSD, 0.00001)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "max", max, tc.expMax, 0.0)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "mean max",
+			meanMax, tc.expMeanMax, 0.0)
+		testhelper.CmpValInt(t, tc.IDStr(), "count", count, len(tc.values))
 	}
 }
 
@@ -179,50 +145,20 @@ func TestHist(t *testing.T) {
 			v += tc.incr
 		}
 
-		if s.count != len(s.cache)+tc.count {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected count: %3d\n", len(s.cache)+tc.count)
-			t.Logf("\t:   actual count: %3d\n", s.count)
-			t.Errorf("\t: count is incorrect\n")
-		}
-		if s.underflow != tc.expUnderflow {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected underflow: %6d\n", tc.expUnderflow)
-			t.Logf("\t:   actual underflow: %6d\n", s.underflow)
-			t.Errorf("\t: underflow is incorrect\n")
-		}
-		if s.overflow != tc.expOverflow {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected overflow: %6d\n", tc.expOverflow)
-			t.Logf("\t:   actual overflow: %6d\n", s.overflow)
-			t.Errorf("\t: overflow is incorrect\n")
-		}
-		if s.hist[0] != tc.exp1stBucketCount {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected 1stBucketCount: %6d\n", tc.exp1stBucketCount)
-			t.Logf("\t:   actual 1stBucketCount: %6d\n", s.hist[0])
-			t.Errorf("\t: 1stBucketCount is incorrect\n")
-		}
-		if s.hist[dfltHistBucketCount-1] != tc.expLastBucketCount {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected LastBucketCount: %6d\n",
-				tc.expLastBucketCount)
-			t.Logf("\t:   actual LastBucketCount: %6d\n",
-				s.hist[dfltHistBucketCount-1])
-			t.Errorf("\t: LastBucketCount is incorrect\n")
-		}
-		if s.bucketStart != tc.expBucketStart {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected bucket start: %g\n", tc.expBucketStart)
-			t.Logf("\t:   actual bucket start: %g\n", s.bucketStart)
-			t.Errorf("\t: bucket start is incorrect\n")
-		}
-		if !mathutil.AlmostEqual(s.bucketWidth, tc.expBucketWidth, 0.00001) {
-			t.Log(tc.IDStr())
-			t.Logf("\t: expected bucket width: %g\n", tc.expBucketWidth)
-			t.Logf("\t:   actual bucket width: %g\n", s.bucketWidth)
-			t.Errorf("\t: bucket width is incorrect\n")
-		}
+		testhelper.CmpValInt(t, tc.IDStr(), "count",
+			s.count, len(s.cache)+tc.count)
+		testhelper.CmpValInt(t, tc.IDStr(), "underflow",
+			s.underflow, tc.expUnderflow)
+		testhelper.CmpValInt(t, tc.IDStr(), "overflow",
+			s.overflow, tc.expOverflow)
+		testhelper.CmpValInt(t, tc.IDStr(), "1stBucketCount",
+			s.hist[0], tc.exp1stBucketCount)
+		testhelper.CmpValInt(t, tc.IDStr(), "LastBucketCount",
+			s.hist[len(s.hist)-1], tc.expLastBucketCount)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "bucket start",
+			s.bucketStart, tc.expBucketStart, 0.0)
+		testhelper.CmpValFloat64(t, tc.IDStr(), "bucket width",
+			s.bucketWidth, tc.expBucketWidth, 0.00001)
 	}
 }
 
