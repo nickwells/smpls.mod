@@ -55,15 +55,15 @@ func TestStat(t *testing.T) {
 			s.Add(val)
 		}
 		min, meanMin, avg, sd, max, meanMax, count := s.Vals()
-		testhelper.CmpValFloat64(t, tc.IDStr(), "min", min, tc.expMin, 0.0)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "mean min",
+		testhelper.DiffFloat64(t, tc.IDStr(), "min", min, tc.expMin, 0.0)
+		testhelper.DiffFloat64(t, tc.IDStr(), "mean min",
 			meanMin, tc.expMeanMin, 0.0)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "avg", avg, tc.expAvg, 0.0)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "sd", sd, tc.expSD, 0.00001)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "max", max, tc.expMax, 0.0)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "mean max",
+		testhelper.DiffFloat64(t, tc.IDStr(), "avg", avg, tc.expAvg, 0.0)
+		testhelper.DiffFloat64(t, tc.IDStr(), "sd", sd, tc.expSD, 0.00001)
+		testhelper.DiffFloat64(t, tc.IDStr(), "max", max, tc.expMax, 0.0)
+		testhelper.DiffFloat64(t, tc.IDStr(), "mean max",
 			meanMax, tc.expMeanMax, 0.0)
-		testhelper.CmpValInt(t, tc.IDStr(), "count", count, len(tc.values))
+		testhelper.DiffInt(t, tc.IDStr(), "count", count, len(tc.values))
 	}
 }
 
@@ -145,19 +145,19 @@ func TestHist(t *testing.T) {
 			v += tc.incr
 		}
 
-		testhelper.CmpValInt(t, tc.IDStr(), "count",
+		testhelper.DiffInt(t, tc.IDStr(), "count",
 			s.count, len(s.cache)+tc.count)
-		testhelper.CmpValInt(t, tc.IDStr(), "underflow",
+		testhelper.DiffInt(t, tc.IDStr(), "underflow",
 			s.underflow, tc.expUnderflow)
-		testhelper.CmpValInt(t, tc.IDStr(), "overflow",
+		testhelper.DiffInt(t, tc.IDStr(), "overflow",
 			s.overflow, tc.expOverflow)
-		testhelper.CmpValInt(t, tc.IDStr(), "1stBucketCount",
+		testhelper.DiffInt(t, tc.IDStr(), "1stBucketCount",
 			s.hist[0], tc.exp1stBucketCount)
-		testhelper.CmpValInt(t, tc.IDStr(), "LastBucketCount",
+		testhelper.DiffInt(t, tc.IDStr(), "LastBucketCount",
 			s.hist[len(s.hist)-1], tc.expLastBucketCount)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "bucket start",
+		testhelper.DiffFloat64(t, tc.IDStr(), "bucket start",
 			s.bucketStart, tc.expBucketStart, 0.0)
-		testhelper.CmpValFloat64(t, tc.IDStr(), "bucket width",
+		testhelper.DiffFloat64(t, tc.IDStr(), "bucket width",
 			s.bucketWidth, tc.expBucketWidth, 0.00001)
 	}
 }
