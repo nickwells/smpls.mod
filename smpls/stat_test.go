@@ -75,7 +75,7 @@ func TestStat(t *testing.T) {
 		cmpWithExpected(t, s, tc)
 
 		s.Reset()
-		s.Add(tc.values[0], tc.values[1:]...)
+		s.AddVals(tc.values...)
 		cmpWithExpected(t, s, tc)
 	}
 }

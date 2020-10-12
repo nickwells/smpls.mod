@@ -266,9 +266,16 @@ func (s *Stat) Reset() {
 	s.bucketWidth = 0
 }
 
-// Add adds new values to the Stat
+// Add adds a single new value to the Stat
 func (s *Stat) Add(v float64, vals ...float64) {
 	s.addVal(v)
+	for _, v := range vals {
+		s.addVal(v)
+	}
+}
+
+// AddVals adds new values to the Stat
+func (s *Stat) AddVals(vals ...float64) {
 	for _, v := range vals {
 		s.addVal(v)
 	}
