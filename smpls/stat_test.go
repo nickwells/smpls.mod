@@ -6,17 +6,34 @@ import (
 	"github.com/nickwells/testhelper.mod/testhelper"
 )
 
+// expVals contains the expected values for the Stat
+type statTC struct {
+	testhelper.ID
+	values     []float64
+	expMin     float64
+	expMeanMin float64
+	expAvg     float64
+	expSD      float64
+	expMax     float64
+	expMeanMax float64
+}
+
+func cmpWithExpected(t *testing.T, s *Stat, tc statTC) {
+	t.Helper()
+
+	id := tc.IDStr()
+	min, meanMin, avg, sd, max, meanMax, count := s.Vals()
+	testhelper.DiffFloat64(t, id, "min", min, tc.expMin, 0.0)
+	testhelper.DiffFloat64(t, id, "mean min", meanMin, tc.expMeanMin, 0.0)
+	testhelper.DiffFloat64(t, id, "avg", avg, tc.expAvg, 0.0)
+	testhelper.DiffFloat64(t, id, "sd", sd, tc.expSD, 0.00001)
+	testhelper.DiffFloat64(t, id, "max", max, tc.expMax, 0.0)
+	testhelper.DiffFloat64(t, id, "mean max", meanMax, tc.expMeanMax, 0.0)
+	testhelper.DiffInt(t, id, "count", count, len(tc.values))
+}
+
 func TestStat(t *testing.T) {
-	testCases := []struct {
-		testhelper.ID
-		values     []float64
-		expMin     float64
-		expMeanMin float64
-		expAvg     float64
-		expSD      float64
-		expMax     float64
-		expMeanMax float64
-	}{
+	testCases := []statTC{
 		{
 			ID:         testhelper.MkID("3 values"),
 			values:     []float64{1.0, 2.0, 3.0},
@@ -51,19 +68,15 @@ func TestStat(t *testing.T) {
 		if err != nil {
 			t.Fatal("Couldn't create the Stat value:", err)
 		}
+
 		for _, val := range tc.values {
 			s.Add(val)
 		}
-		min, meanMin, avg, sd, max, meanMax, count := s.Vals()
-		testhelper.DiffFloat64(t, tc.IDStr(), "min", min, tc.expMin, 0.0)
-		testhelper.DiffFloat64(t, tc.IDStr(), "mean min",
-			meanMin, tc.expMeanMin, 0.0)
-		testhelper.DiffFloat64(t, tc.IDStr(), "avg", avg, tc.expAvg, 0.0)
-		testhelper.DiffFloat64(t, tc.IDStr(), "sd", sd, tc.expSD, 0.00001)
-		testhelper.DiffFloat64(t, tc.IDStr(), "max", max, tc.expMax, 0.0)
-		testhelper.DiffFloat64(t, tc.IDStr(), "mean max",
-			meanMax, tc.expMeanMax, 0.0)
-		testhelper.DiffInt(t, tc.IDStr(), "count", count, len(tc.values))
+		cmpWithExpected(t, s, tc)
+
+		s.Reset()
+		s.Add(tc.values[0], tc.values[1:]...)
+		cmpWithExpected(t, s, tc)
 	}
 }
 
