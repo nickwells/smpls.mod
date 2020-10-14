@@ -12,7 +12,7 @@ type statTC struct {
 	values     []float64
 	expMin     float64
 	expMeanMin float64
-	expAvg     float64
+	expMean    float64
 	expSD      float64
 	expMax     float64
 	expMeanMax float64
@@ -22,14 +22,23 @@ func cmpWithExpected(t *testing.T, s *Stat, tc statTC) {
 	t.Helper()
 
 	id := tc.IDStr()
-	min, meanMin, avg, sd, max, meanMax, count := s.Vals()
+	min, meanMin, mean, sd, max, meanMax, count := s.Vals()
 	testhelper.DiffFloat64(t, id, "min", min, tc.expMin, 0.0)
 	testhelper.DiffFloat64(t, id, "mean min", meanMin, tc.expMeanMin, 0.0)
-	testhelper.DiffFloat64(t, id, "avg", avg, tc.expAvg, 0.0)
+	testhelper.DiffFloat64(t, id, "mean", mean, tc.expMean, 0.0)
 	testhelper.DiffFloat64(t, id, "sd", sd, tc.expSD, 0.00001)
 	testhelper.DiffFloat64(t, id, "max", max, tc.expMax, 0.0)
 	testhelper.DiffFloat64(t, id, "mean max", meanMax, tc.expMeanMax, 0.0)
 	testhelper.DiffInt(t, id, "count", count, len(tc.values))
+
+	id += " - comparing against the individual funcs"
+	testhelper.DiffFloat64(t, id, "min", min, s.Min(), 0.0)
+	testhelper.DiffFloat64(t, id, "mean min", meanMin, s.MeanMin(), 0.0)
+	testhelper.DiffFloat64(t, id, "mean", mean, s.Mean(), 0.0)
+	testhelper.DiffFloat64(t, id, "sd", sd, s.StdDev(), 0.00001)
+	testhelper.DiffFloat64(t, id, "max", max, s.Max(), 0.0)
+	testhelper.DiffFloat64(t, id, "mean max", meanMax, s.MeanMax(), 0.0)
+	testhelper.DiffInt(t, id, "count", count, s.Count())
 }
 
 func TestStat(t *testing.T) {
@@ -39,7 +48,7 @@ func TestStat(t *testing.T) {
 			values:     []float64{1.0, 2.0, 3.0},
 			expMin:     1.0,
 			expMeanMin: 2.0,
-			expAvg:     2.0,
+			expMean:    2.0,
 			expSD:      0.81649658,
 			expMax:     3.0,
 			expMeanMax: 2.0,
@@ -56,7 +65,7 @@ func TestStat(t *testing.T) {
 			},
 			expMin:     1.0,
 			expMeanMin: 1.95,
-			expAvg:     2.0,
+			expMean:    2.0,
 			expSD:      0.3015113,
 			expMax:     3.0,
 			expMeanMax: 2.05,

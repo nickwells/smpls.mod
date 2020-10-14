@@ -85,6 +85,72 @@ func (s Stat) Vals() (min, meanMin, avg, sd, max, meanMax float64, count int) {
 	return
 }
 
+// Count returns the number of values that have been added
+func (s Stat) Count() int {
+	return s.count
+}
+
+// Sum returns the sum of values that have been added
+func (s Stat) Sum() float64 {
+	return s.sum
+}
+
+// Min returns the min of the collected values or 0.0 if no values have
+// been added
+func (s Stat) Min() float64 {
+	if s.count == 0 {
+		return 0.0
+	}
+	return s.mins[0]
+}
+
+// MeanMin returns the mean of the N smallest collected values or 0.0 if no
+// values have been added.
+func (s Stat) MeanMin() float64 {
+	if s.count == 0 {
+		return 0.0
+	}
+	return calcMean(s.mins)
+}
+
+// Max returns the max of the collected values or 0.0 if no values have
+// been added
+func (s Stat) Max() float64 {
+	if s.count == 0 {
+		return 0.0
+	}
+	return s.maxs[len(s.maxs)-1]
+}
+
+// MeanMax returns the mean of the N largest collected values or 0.0 if no
+// values have been added.
+func (s Stat) MeanMax() float64 {
+	if s.count == 0 {
+		return 0.0
+	}
+	return calcMean(s.maxs)
+}
+
+// Mean returns the mean of the collected values or 0.0 if no values have
+// been added
+func (s Stat) Mean() float64 {
+	if s.count == 0 {
+		return 0.0
+	}
+	return s.sum / float64(s.count)
+}
+
+// StdDev returns the standard deviation of the collected values or 0.0 if
+// fewer than 2 values have been added
+func (s Stat) StdDev() float64 {
+	if s.count < 2 {
+		return 0.0
+	}
+
+	avg := s.sum / float64(s.count)
+	return math.Sqrt((s.sumSq / float64(s.count)) - (avg * avg))
+}
+
 // String prints the statistics from the given values
 func (s Stat) String() string {
 	min, meanMin, avg, sd, max, meanMax, count := s.Vals()
