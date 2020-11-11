@@ -306,7 +306,7 @@ func resetFloat64Slice(s []float64) {
 	copy(s, zeros)
 }
 
-// resetInySlice resets the contents of the slice to zeros
+// resetIntSlice resets the contents of the slice to zeros
 func resetIntSlice(s []int) {
 	if len(s) == 0 {
 		return
