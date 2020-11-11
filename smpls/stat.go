@@ -384,8 +384,8 @@ func (s *Stat) addVal(v float64) {
 // size and then populates the buckets from the cache
 func (s *Stat) populateHist() {
 	if len(s.hist) == 0 {
-		panic("The histogram has not been initialised" +
-			" - use NewStat(...) to create the Stat object")
+		panic(errors.New("the histogram is not initialised" +
+			" - use NewStat(...) to create a Stat object"))
 	}
 
 	s.bucketStart = s.mins[0]
