@@ -2,4 +2,4 @@ module github.com/nickwells/smpls.mod
 
 go 1.15
 
-require github.com/nickwells/testhelper.mod v1.15.0
+require github.com/nickwells/testhelper.mod v1.15.1
