@@ -3,7 +3,7 @@ package smpls
 import (
 	"testing"
 
-	"github.com/nickwells/testhelper.mod/testhelper"
+	"github.com/nickwells/testhelper.mod/v2/testhelper"
 )
 
 // expVals contains the expected values for the Stat
@@ -23,21 +23,21 @@ func cmpWithExpected(t *testing.T, s *Stat, tc statTC) {
 
 	id := tc.IDStr()
 	min, meanMin, mean, sd, max, meanMax, count := s.Vals()
-	testhelper.DiffFloat64(t, id, "min", min, tc.expMin, 0.0)
-	testhelper.DiffFloat64(t, id, "mean min", meanMin, tc.expMeanMin, 0.0)
-	testhelper.DiffFloat64(t, id, "mean", mean, tc.expMean, 0.0)
-	testhelper.DiffFloat64(t, id, "sd", sd, tc.expSD, 0.00001)
-	testhelper.DiffFloat64(t, id, "max", max, tc.expMax, 0.0)
-	testhelper.DiffFloat64(t, id, "mean max", meanMax, tc.expMeanMax, 0.0)
+	testhelper.DiffFloat(t, id, "min", min, tc.expMin, 0.0)
+	testhelper.DiffFloat(t, id, "mean min", meanMin, tc.expMeanMin, 0.0)
+	testhelper.DiffFloat(t, id, "mean", mean, tc.expMean, 0.0)
+	testhelper.DiffFloat(t, id, "sd", sd, tc.expSD, 0.00001)
+	testhelper.DiffFloat(t, id, "max", max, tc.expMax, 0.0)
+	testhelper.DiffFloat(t, id, "mean max", meanMax, tc.expMeanMax, 0.0)
 	testhelper.DiffInt(t, id, "count", count, len(tc.values))
 
 	id += " - comparing against the individual funcs"
-	testhelper.DiffFloat64(t, id, "min", min, s.Min(), 0.0)
-	testhelper.DiffFloat64(t, id, "mean min", meanMin, s.MeanMin(), 0.0)
-	testhelper.DiffFloat64(t, id, "mean", mean, s.Mean(), 0.0)
-	testhelper.DiffFloat64(t, id, "sd", sd, s.StdDev(), 0.00001)
-	testhelper.DiffFloat64(t, id, "max", max, s.Max(), 0.0)
-	testhelper.DiffFloat64(t, id, "mean max", meanMax, s.MeanMax(), 0.0)
+	testhelper.DiffFloat(t, id, "min", min, s.Min(), 0.0)
+	testhelper.DiffFloat(t, id, "mean min", meanMin, s.MeanMin(), 0.0)
+	testhelper.DiffFloat(t, id, "mean", mean, s.Mean(), 0.0)
+	testhelper.DiffFloat(t, id, "sd", sd, s.StdDev(), 0.00001)
+	testhelper.DiffFloat(t, id, "max", max, s.Max(), 0.0)
+	testhelper.DiffFloat(t, id, "mean max", meanMax, s.MeanMax(), 0.0)
 	testhelper.DiffInt(t, id, "count", count, s.Count())
 }
 
@@ -177,9 +177,9 @@ func TestHist(t *testing.T) {
 			s.hist[0], tc.exp1stBucketCount)
 		testhelper.DiffInt(t, tc.IDStr(), "LastBucketCount",
 			s.hist[len(s.hist)-1], tc.expLastBucketCount)
-		testhelper.DiffFloat64(t, tc.IDStr(), "bucket start",
+		testhelper.DiffFloat(t, tc.IDStr(), "bucket start",
 			s.bucketStart, tc.expBucketStart, 0.0)
-		testhelper.DiffFloat64(t, tc.IDStr(), "bucket width",
+		testhelper.DiffFloat(t, tc.IDStr(), "bucket width",
 			s.bucketWidth, tc.expBucketWidth, 0.00001)
 	}
 }

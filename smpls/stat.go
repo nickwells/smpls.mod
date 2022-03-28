@@ -390,9 +390,8 @@ func (s *Stat) populateHist() {
 
 	s.bucketStart = s.mins[0]
 	end := s.maxs[len(s.maxs)-1]
-	s.bucketWidth =
-		histBucketWidthScale *
-			(end - s.bucketStart) / float64(len(s.hist))
+	s.bucketWidth = histBucketWidthScale *
+		(end - s.bucketStart) / float64(len(s.hist))
 
 	for _, v := range s.cache {
 		s.addToHist(v)
