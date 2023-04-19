@@ -20,7 +20,8 @@ const (
 	minHistBucketCount   = 2
 	histBucketWidthScale = 1.000001
 
-	cacheSize = 10000
+	dfltCacheSize = 10000
+	minCacheSize  = 2
 )
 
 type discardType int
@@ -45,7 +46,7 @@ type Stat struct {
 	mins  []float64
 	maxs  []float64
 
-	cache [cacheSize]float64
+	cache []float64
 
 	underflow   int
 	hist        []int
@@ -172,6 +173,10 @@ func (s Stat) String() string {
 
 // Hist returns a string showing the histogram of values
 func (s Stat) Hist() string {
+	if s.count < cap(s.cache) {
+		s.populateHist()
+	}
+
 	if s.count < len(s.hist) {
 		return ""
 	}
@@ -236,6 +241,25 @@ func StatMinMaxCount(c int) StatOpt {
 	}
 }
 
+// StatCacheSize returns a function that will create the cache slice of the
+// given size in a Stat object
+func StatCacheSize(c int) StatOpt {
+	return func(s *Stat) error {
+		if s.cache != nil {
+			return errors.New(
+				"the cache of values has already been created")
+		}
+		if c < minCacheSize {
+			return fmt.Errorf(
+				"Invalid cache size (%d) - it must be >= %d",
+				c, minCacheSize)
+		}
+
+		s.cache = make([]float64, 0, c)
+		return nil
+	}
+}
+
 // StatHistBucketCount returns a function that will create a hist slice with the
 // given number of buckets in a Stat object
 func StatHistBucketCount(c int) StatOpt {
@@ -252,6 +276,13 @@ func StatHistBucketCount(c int) StatOpt {
 
 		s.hist = make([]int, c)
 		return nil
+	}
+}
+
+// makeDfltCache creates a cache slice of default size if not already created
+func (s *Stat) makeDfltCache() {
+	if s.cache == nil {
+		s.cache = make([]float64, 0, dfltCacheSize)
 	}
 }
 
@@ -274,6 +305,8 @@ func NewStat(units string, opts ...StatOpt) (*Stat, error) {
 	if len(s.hist) == 0 {
 		s.hist = make([]int, dfltHistBucketCount)
 	}
+
+	s.makeDfltCache()
 
 	return s, nil
 }
@@ -314,7 +347,7 @@ func (s *Stat) Reset() {
 	s.mins = s.mins[:0]
 	s.maxs = s.maxs[:0]
 
-	resetFloat64Slice(s.cache[:])
+	resetFloat64Slice(s.cache)
 
 	s.underflow = 0
 	resetIntSlice(s.hist)
@@ -360,10 +393,10 @@ func (s *Stat) addVal(v float64) {
 		}
 	}
 
-	if s.count <= len(s.cache) {
-		s.cache[s.count-1] = v
+	if len(s.cache) < cap(s.cache) {
+		s.cache = append(s.cache, v)
 
-		if s.count == len(s.cache) {
+		if len(s.cache) == cap(s.cache) {
 			s.populateHist()
 		}
 	} else {
