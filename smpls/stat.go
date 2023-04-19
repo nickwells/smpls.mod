@@ -53,6 +53,8 @@ type Stat struct {
 	overflow    int
 	bucketStart float64
 	bucketWidth float64
+
+	histSizeChosen bool
 }
 
 // calcMean will calculate the average value of the entries in the slice
@@ -279,6 +281,8 @@ func StatHistBucketCount(c int) StatOpt {
 		}
 
 		s.hist = make([]int, c)
+		s.histSizeChosen = true
+
 		return nil
 	}
 }
@@ -422,19 +426,41 @@ func (s *Stat) addVal(v float64) {
 // populateHist calculates the boundaries of the histogram and the bucket
 // size and then populates the buckets from the cache
 func (s *Stat) populateHist() {
-	if len(s.hist) == 0 {
-		panic(errors.New("the histogram is not initialised" +
-			" - use NewStat(...) to create a Stat object"))
+	if s.cache == nil {
+		return
 	}
 
-	s.bucketStart = s.mins[0]
-	end := s.maxs[len(s.maxs)-1]
-	s.bucketWidth = histBucketWidthScale *
-		(end - s.bucketStart) / float64(len(s.hist))
+	s.makeDfltHist()
+
+	s.initHist()
 
 	for _, v := range s.cache {
 		s.addToHist(v)
 	}
+	s.cache = nil
+}
+
+// initHist initialises the histogram. Unless the hist size has been chosen
+// it will resize the histogram to ensure there are enough data values to
+// have at least a minimum average number of entries in each bucket.  It sets
+// the bucket start and bucket width values for the histogram.
+func (s *Stat) initHist() {
+	const minPerBucket = 5
+
+	if !s.histSizeChosen {
+		if s.count/len(s.hist) < minPerBucket {
+			newHistSize := int(s.count / minPerBucket)
+			if newHistSize < minHistBucketCount {
+				newHistSize = minHistBucketCount
+			}
+			s.hist = s.hist[:newHistSize]
+		}
+	}
+
+	s.bucketStart = s.mins[0]
+	valRange := s.maxs[len(s.maxs)-1] - s.bucketStart
+	bucketCount := float64(len(s.hist))
+	s.bucketWidth = histBucketWidthScale * valRange / bucketCount
 }
 
 // addToHist adds the value to the histogram of values
