@@ -283,10 +283,28 @@ func StatHistBucketCount(c int) StatOpt {
 	}
 }
 
+// makeDfltHist creates a hist slice of default size if not already
+// created. Note that it makes it with length set so that the slice is
+// populated with zero initial values.
+func (s *Stat) makeDfltHist() {
+	if s.hist == nil {
+		s.hist = make([]int, dfltHistBucketCount)
+	}
+}
+
 // makeDfltCache creates a cache slice of default size if not already created
 func (s *Stat) makeDfltCache() {
 	if s.cache == nil {
 		s.cache = make([]float64, 0, dfltCacheSize)
+	}
+}
+
+// makeDfltMinsMaxs creates the mins and maxs slices of default size if not
+// already created
+func (s *Stat) makeDfltMinsMaxs() {
+	if s.mins == nil {
+		s.mins = make([]float64, 0, dfltMinMaxCount)
+		s.maxs = make([]float64, 0, dfltMinMaxCount)
 	}
 }
 
@@ -300,17 +318,10 @@ func NewStat(units string, opts ...StatOpt) (*Stat, error) {
 			return nil, err
 		}
 	}
-	if len(s.mins) == 0 {
-		s.mins = make([]float64, 0, dfltMinMaxCount)
-	}
-	if len(s.maxs) == 0 {
-		s.maxs = make([]float64, 0, dfltMinMaxCount)
-	}
-	if len(s.hist) == 0 {
-		s.hist = make([]int, dfltHistBucketCount)
-	}
 
 	s.makeDfltCache()
+	s.makeDfltMinsMaxs()
+	s.makeDfltHist()
 
 	return s, nil
 }
