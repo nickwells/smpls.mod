@@ -6,6 +6,8 @@ import (
 	"math"
 	"sort"
 	"strings"
+
+	"github.com/nickwells/mathutil.mod/v2/mathutil"
 )
 
 // Created: Thu Aug  6 13:01:57 2020
@@ -169,7 +171,8 @@ func (s Stat) Hist() string {
 		return ""
 	}
 
-	countFmt := fmt.Sprintf("%%%dd", maxDigits(s.count)) + " %6.2f%% %s"
+	countFmt := fmt.Sprintf("%%%dd", mathutil.Digits(int64(s.count))) +
+		" %6.2f%% %s"
 
 	valFmt := "%8.2e"
 	valSpace := strings.Repeat(" ", len(fmt.Sprintf(valFmt, 0.0)))
@@ -204,23 +207,6 @@ func (s Stat) Hist() string {
 func histValStr(val, tot int, fmtStr string) string {
 	pct := 100.0 * float64(val) / float64(tot)
 	return fmt.Sprintf(fmtStr, val, pct, strings.Repeat("*", int(pct*0.5)))
-}
-
-// maxDigits returns the space (the number of digits plus potentially a sign
-// marker) needed to print the value
-func maxDigits(v int) int {
-	if v == 0 {
-		return 1
-	}
-
-	d := 0
-	if v < 0 {
-		d++
-		v *= -1
-	}
-	d += int(math.Ceil(math.Log10(float64(v) + 0.1)))
-
-	return d
 }
 
 type StatOpt func(s *Stat) error
