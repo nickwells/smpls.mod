@@ -489,7 +489,8 @@ func insert(v float64, vals []float64, discard discardType) {
 	var i int
 	var cmp float64
 
-	if discard == dropFromEnd {
+	switch discard {
+	case dropFromEnd:
 		for i, cmp = range vals {
 			if cmp >= v {
 				break
@@ -499,7 +500,7 @@ func insert(v float64, vals []float64, discard discardType) {
 		if i+1 < len(vals) {
 			copy(vals[i+1:], vals[i:len(vals)-1])
 		}
-	} else if discard == dropFromStart {
+	case dropFromStart:
 		for i = len(vals) - 1; i > 0; i-- {
 			if vals[i] < v {
 				break
