@@ -184,8 +184,12 @@ func (s Stat) Hist() string {
 	countFmt := fmt.Sprintf("%%%dd", mathutil.Digits(int64(s.count))) +
 		" %6.2f%% %s"
 
-	valFmt := "%8.2e"
-	valSpace := strings.Repeat(" ", len(fmt.Sprintf(valFmt, 0.0)))
+	width, precision := mathutil.FmtValsForSigFigsMulti(3,
+		s.bucketStart,
+		s.bucketWidth,
+		s.bucketStart+s.bucketWidth*float64(len(s.hist)))
+	valFmt := fmt.Sprintf("%%%d.%df", width, precision)
+	valSpace := strings.Repeat(" ", width)
 	fromFmt := ">= " + valFmt
 	toFmt := "< " + valFmt
 
