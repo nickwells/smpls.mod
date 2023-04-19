@@ -89,15 +89,42 @@ func TestStat(t *testing.T) {
 	}
 }
 
+// expectedCacheEntries returns the expected number of entries in the cache
+func expectedCacheEntries(size, count int) int {
+	cacheSize := size
+	if cacheSize == 0 {
+		cacheSize = dfltCacheSize
+	}
+	if count == 0 || count > cacheSize {
+		return cacheSize
+	}
+	return count
+}
+
+// populateTestCache adds entries to the Stat's cache.
+func populateTestCache(s *Stat, init, incr float64, count int) {
+	v := init
+	if count <= 0 || count > cap(s.cache) {
+		count = cap(s.cache)
+	}
+	for i := 0; i < count; i++ {
+		s.Add(v)
+		v += incr
+	}
+}
+
 func TestHist(t *testing.T) {
 	testCases := []struct {
 		testhelper.ID
 
-		cacheInit float64
-		cacheIncr float64
-		init      float64
-		incr      float64
-		count     int
+		cacheSize  int
+		cacheInit  float64
+		cacheIncr  float64
+		cacheCount int
+
+		init  float64
+		incr  float64
+		count int
 
 		expUnderflow       int
 		expOverflow        int
@@ -113,11 +140,25 @@ func TestHist(t *testing.T) {
 			cacheIncr:          6.0,
 			expUnderflow:       0,
 			expOverflow:        0,
-			exp1stBucketCount:  cacheSize / dfltHistBucketCount,
-			expLastBucketCount: cacheSize / dfltHistBucketCount,
+			exp1stBucketCount:  dfltCacheSize / dfltHistBucketCount,
+			expLastBucketCount: dfltCacheSize / dfltHistBucketCount,
 			expBucketStart:     180.0,
 			expBucketWidth: histBucketWidthScale *
-				(6.0 * (cacheSize - 1)) / dfltHistBucketCount,
+				(6.0 * (dfltCacheSize - 1)) / dfltHistBucketCount,
+		},
+		{
+			ID:                 testhelper.MkID("half cache"),
+			cacheSize:          1000,
+			cacheInit:          180.0,
+			cacheIncr:          6.0,
+			cacheCount:         500,
+			expUnderflow:       0,
+			expOverflow:        0,
+			exp1stBucketCount:  500 / dfltHistBucketCount,
+			expLastBucketCount: 500 / dfltHistBucketCount,
+			expBucketStart:     180.0,
+			expBucketWidth: histBucketWidthScale *
+				(6.0 * (500 - 1)) / (dfltHistBucketCount),
 		},
 		{
 			ID:                 testhelper.MkID("3 values below bucketStart"),
@@ -128,47 +169,52 @@ func TestHist(t *testing.T) {
 			count:              3,
 			expUnderflow:       3,
 			expOverflow:        0,
-			exp1stBucketCount:  cacheSize / dfltHistBucketCount,
-			expLastBucketCount: cacheSize / dfltHistBucketCount,
+			exp1stBucketCount:  dfltCacheSize / dfltHistBucketCount,
+			expLastBucketCount: dfltCacheSize / dfltHistBucketCount,
 			expBucketStart:     180.0,
 			expBucketWidth: histBucketWidthScale *
-				(6.0 * (cacheSize - 1)) / dfltHistBucketCount,
+				(6.0 * (dfltCacheSize - 1)) / dfltHistBucketCount,
 		},
 		{
 			ID:                 testhelper.MkID("3 values above end of hist"),
 			cacheInit:          180.0,
 			cacheIncr:          6.0,
-			init:               6.0*cacheSize + 180.0,
+			init:               6.0*dfltCacheSize + 180.0,
 			incr:               20.0,
 			count:              3,
 			expUnderflow:       0,
 			expOverflow:        3,
-			exp1stBucketCount:  cacheSize / dfltHistBucketCount,
-			expLastBucketCount: cacheSize / dfltHistBucketCount,
+			exp1stBucketCount:  dfltCacheSize / dfltHistBucketCount,
+			expLastBucketCount: dfltCacheSize / dfltHistBucketCount,
 			expBucketStart:     180.0,
 			expBucketWidth: histBucketWidthScale *
-				(6.0 * (cacheSize - 1)) / dfltHistBucketCount,
+				(6.0 * (dfltCacheSize - 1)) / dfltHistBucketCount,
 		},
 	}
 
 	for _, tc := range testCases {
-		s, err := NewStat("units")
+		var s *Stat
+		var err error
+		SOFuncs := []StatOpt{}
+		if tc.cacheSize > 0 {
+			SOFuncs = append(SOFuncs, StatCacheSize(tc.cacheSize))
+		}
+		s, err = NewStat("units", SOFuncs...)
 		if err != nil {
 			t.Fatal("couldn't create the Stat:", err)
 		}
-		v := tc.cacheInit
-		for i := 0; i < len(s.cache); i++ {
-			s.Add(v)
-			v += tc.cacheIncr
-		}
-		v = tc.init
+
+		populateTestCache(s, tc.cacheInit, tc.cacheIncr, tc.cacheCount)
+		v := tc.init
 		for i := 0; i < tc.count; i++ {
 			s.Add(v)
 			v += tc.incr
 		}
 
+		s.populateHist()
+
 		testhelper.DiffInt(t, tc.IDStr(), "count",
-			s.count, len(s.cache)+tc.count)
+			s.count, expectedCacheEntries(tc.cacheSize, tc.cacheCount)+tc.count)
 		testhelper.DiffInt(t, tc.IDStr(), "underflow",
 			s.underflow, tc.expUnderflow)
 		testhelper.DiffInt(t, tc.IDStr(), "overflow",
