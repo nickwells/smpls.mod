@@ -32,7 +32,7 @@ const (
 )
 
 // Stat records statistics. It will automatically calculate minima, maxima,
-// mean and stadnard deviation. It will construct a histogram giving an
+// mean and standard deviation. It will construct a histogram giving an
 // indication of the distribution of values.
 //
 // Note that operations on this are not thread safe and it should be mutex
