@@ -22,21 +22,21 @@ func cmpWithExpected(t *testing.T, s *Stat, tc statTC) {
 	t.Helper()
 
 	id := tc.IDStr()
-	min, meanMin, mean, sd, max, meanMax, count := s.Vals()
-	testhelper.DiffFloat(t, id, "min", min, tc.expMin, 0.0)
+	minimum, meanMin, mean, sd, maximum, meanMax, count := s.Vals()
+	testhelper.DiffFloat(t, id, "min", minimum, tc.expMin, 0.0)
 	testhelper.DiffFloat(t, id, "mean min", meanMin, tc.expMeanMin, 0.0)
 	testhelper.DiffFloat(t, id, "mean", mean, tc.expMean, 0.0)
 	testhelper.DiffFloat(t, id, "sd", sd, tc.expSD, 0.00001)
-	testhelper.DiffFloat(t, id, "max", max, tc.expMax, 0.0)
+	testhelper.DiffFloat(t, id, "max", maximum, tc.expMax, 0.0)
 	testhelper.DiffFloat(t, id, "mean max", meanMax, tc.expMeanMax, 0.0)
 	testhelper.DiffInt(t, id, "count", count, len(tc.values))
 
 	id += " - comparing against the individual funcs"
-	testhelper.DiffFloat(t, id, "min", min, s.Min(), 0.0)
+	testhelper.DiffFloat(t, id, "min", minimum, s.Min(), 0.0)
 	testhelper.DiffFloat(t, id, "mean min", meanMin, s.MeanMin(), 0.0)
 	testhelper.DiffFloat(t, id, "mean", mean, s.Mean(), 0.0)
 	testhelper.DiffFloat(t, id, "sd", sd, s.StdDev(), 0.00001)
-	testhelper.DiffFloat(t, id, "max", max, s.Max(), 0.0)
+	testhelper.DiffFloat(t, id, "max", maximum, s.Max(), 0.0)
 	testhelper.DiffFloat(t, id, "mean max", meanMax, s.MeanMax(), 0.0)
 	testhelper.DiffInt(t, id, "count", count, s.Count())
 }
@@ -81,6 +81,7 @@ func TestStat(t *testing.T) {
 		for _, val := range tc.values {
 			s.Add(val)
 		}
+
 		cmpWithExpected(t, s, tc)
 
 		s.Reset()
@@ -95,18 +96,22 @@ func expectedCacheEntries(size, count int) int {
 	if cacheSize == 0 {
 		cacheSize = dfltCacheSize
 	}
+
 	if count == 0 || count > cacheSize {
 		return cacheSize
 	}
+
 	return count
 }
 
 // populateTestCache adds entries to the Stat's cache.
 func populateTestCache(s *Stat, init, incr float64, count int) {
 	v := init
+
 	if count <= 0 || count > cap(s.cache) {
 		count = cap(s.cache)
 	}
+
 	for i := 0; i < count; i++ {
 		s.Add(v)
 		v += incr
@@ -194,17 +199,22 @@ func TestHist(t *testing.T) {
 
 	for _, tc := range testCases {
 		var s *Stat
+
 		var err error
+
 		SOFuncs := []StatOpt{}
+
 		if tc.cacheSize > 0 {
 			SOFuncs = append(SOFuncs, StatCacheSize(tc.cacheSize))
 		}
+
 		s, err = NewStat("units", SOFuncs...)
 		if err != nil {
 			t.Fatal("couldn't create the Stat:", err)
 		}
 
 		populateTestCache(s, tc.cacheInit, tc.cacheIncr, tc.cacheCount)
+
 		v := tc.init
 		for i := 0; i < tc.count; i++ {
 			s.Add(v)
@@ -286,14 +296,17 @@ func TestInsert(t *testing.T) {
 		initVals := make([]float64, len(tc.vals))
 		copy(initVals, tc.vals)
 		insert(tc.v, tc.vals, tc.discard)
+
 		if floatSliceDiffers(tc.vals, tc.expVals) {
 			t.Log(tc.IDStr())
 			t.Logf("\t: inserting %g into %v\n", tc.v, initVals)
+
 			if tc.discard == dropFromEnd {
 				t.Log("\t\tDiscarding from the end\n")
 			} else {
 				t.Log("\t\tDiscarding from the start\n")
 			}
+
 			t.Log("\t: expected:", tc.expVals)
 			t.Log("\t:      got:", tc.vals)
 			t.Errorf("\t: unexpected result\n")
@@ -306,10 +319,12 @@ func floatSliceDiffers(a, b []float64) bool {
 	if len(a) != len(b) {
 		return true
 	}
+
 	for i, aval := range a {
 		if aval != b[i] {
 			return true
 		}
 	}
+
 	return false
 }

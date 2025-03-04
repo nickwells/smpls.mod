@@ -64,6 +64,7 @@ func calcMean(s []float64) float64 {
 	for _, v := range s {
 		sum += v
 	}
+
 	return sum / float64(len(s))
 }
 
@@ -78,20 +79,27 @@ func calcMean(s []float64) float64 {
 // other. The cache size can be changed when creating the Stat object by
 // passing the option function returned by StatMinMaxCount to the NewStat
 // function.
-func (s Stat) Vals() (min, meanMin, avg, sd, max, meanMax float64, count int) {
+func (s Stat) Vals() (
+	minimum, meanMin, avg, sd, maximum, meanMax float64,
+	count int,
+) {
 	if s.count == 0 {
 		return
 	}
-	min = s.mins[0]
+
+	minimum = s.mins[0]
 	meanMin = calcMean(s.mins)
 	avg = s.sum / float64(s.count)
 	sd = 0
+
 	if s.count > 1 {
 		sd = math.Sqrt((s.sumSq / float64(s.count)) - (avg * avg))
 	}
-	max = s.maxs[len(s.maxs)-1]
+
+	maximum = s.maxs[len(s.maxs)-1]
 	meanMax = calcMean(s.maxs)
 	count = s.count
+
 	return
 }
 
@@ -111,6 +119,7 @@ func (s Stat) Min() float64 {
 	if s.count == 0 {
 		return 0.0
 	}
+
 	return s.mins[0]
 }
 
@@ -120,6 +129,7 @@ func (s Stat) MeanMin() float64 {
 	if s.count == 0 {
 		return 0.0
 	}
+
 	return calcMean(s.mins)
 }
 
@@ -129,6 +139,7 @@ func (s Stat) Max() float64 {
 	if s.count == 0 {
 		return 0.0
 	}
+
 	return s.maxs[len(s.maxs)-1]
 }
 
@@ -138,6 +149,7 @@ func (s Stat) MeanMax() float64 {
 	if s.count == 0 {
 		return 0.0
 	}
+
 	return calcMean(s.maxs)
 }
 
@@ -147,30 +159,35 @@ func (s Stat) Mean() float64 {
 	if s.count == 0 {
 		return 0.0
 	}
+
 	return s.sum / float64(s.count)
 }
 
 // StdDev returns the standard deviation of the collected values or 0.0 if
 // fewer than 2 values have been added
 func (s Stat) StdDev() float64 {
-	if s.count < 2 {
+	const minCountReqd = 2
+
+	if s.count < minCountReqd {
 		return 0.0
 	}
 
 	avg := s.sum / float64(s.count)
+
 	return math.Sqrt((s.sumSq / float64(s.count)) - (avg * avg))
 }
 
 // String prints the statistics from the given values
 func (s Stat) String() string {
-	min, meanMin, avg, sd, max, meanMax, count := s.Vals()
+	minimum, meanMin, avg, sd, maximum, meanMax, count := s.Vals()
+
 	return fmt.Sprintf(
 		"%7d observations,"+
 			" min: %8.2e (%8.2e),"+
 			" avg: %8.2e,"+
 			" max: %8.2e (%8.2e),"+
 			" SD: %8.2e",
-		count, min, meanMin, avg, max, meanMax, sd)
+		count, minimum, meanMin, avg, maximum, meanMax, sd)
 }
 
 // Hist returns a string showing the histogram of values
@@ -186,7 +203,10 @@ func (s Stat) Hist() string {
 	countFmt := fmt.Sprintf("%%%dd", mathutil.Digits(int64(s.count))) +
 		" %6.2f%% %s"
 
-	width, precision := mathutil.FmtValsForSigFigsMulti(3,
+	const significantFigures = 3
+
+	width, precision := mathutil.FmtValsForSigFigsMulti(
+		uint8(significantFigures),
 		s.bucketStart,
 		s.bucketWidth,
 		s.bucketStart+s.bucketWidth*float64(len(s.hist)))
@@ -205,6 +225,7 @@ func (s Stat) Hist() string {
 
 	minVal := s.bucketStart
 	maxVal := minVal + s.bucketWidth
+
 	for _, count := range s.hist {
 		hist += fmt.Sprintf(stdFmt, minVal, maxVal,
 			histValStr(count, s.count, countFmt))
@@ -214,6 +235,7 @@ func (s Stat) Hist() string {
 
 	hist += fmt.Sprintf(overflowFmt, minVal,
 		histValStr(s.overflow, s.count, countFmt))
+
 	return hist
 }
 
@@ -221,8 +243,12 @@ func (s Stat) Hist() string {
 // shown, followed by the value as a percentage of the total and a string of
 // stars corresponding to the percentage value
 func histValStr(val, tot int, fmtStr string) string {
-	pct := 100.0 * float64(val) / float64(tot)
-	return fmt.Sprintf(fmtStr, val, pct, strings.Repeat("*", int(pct*0.5)))
+	pct := mathutil.ToPercent(float64(val) / float64(tot))
+
+	const scaleFactor = 0.5
+
+	return fmt.Sprintf(fmtStr,
+		val, pct, strings.Repeat("*", int(pct*scaleFactor)))
 }
 
 type StatOpt func(s *Stat) error
@@ -235,6 +261,7 @@ func StatMinMaxCount(c int) StatOpt {
 			return errors.New(
 				"the slice of minimum values has already been created")
 		}
+
 		if c < minMinMaxCount {
 			return fmt.Errorf(
 				"Invalid Min/Max Count (%d) - it must be >= %d",
@@ -243,6 +270,7 @@ func StatMinMaxCount(c int) StatOpt {
 
 		s.mins = make([]float64, 0, c)
 		s.maxs = make([]float64, 0, c)
+
 		return nil
 	}
 }
@@ -255,6 +283,7 @@ func StatCacheSize(c int) StatOpt {
 			return errors.New(
 				"the cache of values has already been created")
 		}
+
 		if c < minCacheSize {
 			return fmt.Errorf(
 				"Invalid cache size (%d) - it must be >= %d",
@@ -262,6 +291,7 @@ func StatCacheSize(c int) StatOpt {
 		}
 
 		s.cache = make([]float64, 0, c)
+
 		return nil
 	}
 }
@@ -274,6 +304,7 @@ func StatHistBucketCount(c int) StatOpt {
 			return errors.New(
 				"the histogram slice has already been created")
 		}
+
 		if c < minHistBucketCount {
 			return fmt.Errorf(
 				"Invalid Hist Bucket Count (%d) - it must be >= %d",
@@ -337,6 +368,7 @@ func NewStatOrPanic(units string, opts ...StatOpt) *Stat {
 	if err != nil {
 		panic(err)
 	}
+
 	return s
 }
 
@@ -345,7 +377,9 @@ func resetFloat64Slice(s []float64) {
 	if len(s) == 0 {
 		return
 	}
+
 	zeros := make([]float64, len(s))
+
 	copy(s, zeros)
 }
 
@@ -354,7 +388,9 @@ func resetIntSlice(s []int) {
 	if len(s) == 0 {
 		return
 	}
+
 	zeros := make([]int, len(s))
+
 	copy(s, zeros)
 }
 
@@ -378,6 +414,7 @@ func (s *Stat) Reset() {
 // Add adds at least one new value to the Stat
 func (s *Stat) Add(v float64, vals ...float64) {
 	s.addVal(v)
+
 	for _, v := range vals {
 		s.addVal(v)
 	}
@@ -409,6 +446,7 @@ func (s *Stat) addVal(v float64) {
 		if v < s.mins[maxIdx] { // smaller than the largest min value
 			insert(v, s.mins, dropFromEnd)
 		}
+
 		if v > s.maxs[0] { // larger than the smallest max value
 			insert(v, s.maxs, dropFromStart)
 		}
@@ -439,6 +477,7 @@ func (s *Stat) populateHist() {
 	for _, v := range s.cache {
 		s.addToHist(v)
 	}
+
 	s.cache = nil
 }
 
@@ -455,6 +494,7 @@ func (s *Stat) initHist() {
 			if newHistSize < minHistBucketCount {
 				newHistSize = minHistBucketCount
 			}
+
 			s.hist = s.hist[:newHistSize]
 		}
 	}
@@ -487,6 +527,7 @@ func (s *Stat) addToHist(v float64) {
 // discard type. The vals slice is assumed to be sorted in ascending order.
 func insert(v float64, vals []float64, discard discardType) {
 	var i int
+
 	var cmp float64
 
 	switch discard {
@@ -506,9 +547,11 @@ func insert(v float64, vals []float64, discard discardType) {
 				break
 			}
 		}
+
 		if i > 0 {
 			copy(vals[:i], vals[1:i+1])
 		}
 	}
+
 	vals[i] = v
 }
