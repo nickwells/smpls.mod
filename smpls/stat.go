@@ -251,6 +251,7 @@ func histValStr(val, tot int, fmtStr string) string {
 		val, pct, strings.Repeat("*", int(pct*scaleFactor)))
 }
 
+// StatOpt is the type of an option setting function
 type StatOpt func(s *Stat) error
 
 // StatMinMaxCount returns a function that will create min/max slices of the
@@ -264,7 +265,7 @@ func StatMinMaxCount(c int) StatOpt {
 
 		if c < minMinMaxCount {
 			return fmt.Errorf(
-				"Invalid Min/Max Count (%d) - it must be >= %d",
+				"invalid Min/Max Count (%d) - it must be >= %d",
 				c, minMinMaxCount)
 		}
 
@@ -286,7 +287,7 @@ func StatCacheSize(c int) StatOpt {
 
 		if c < minCacheSize {
 			return fmt.Errorf(
-				"Invalid cache size (%d) - it must be >= %d",
+				"invalid cache size (%d) - it must be >= %d",
 				c, minCacheSize)
 		}
 
@@ -307,7 +308,7 @@ func StatHistBucketCount(c int) StatOpt {
 
 		if c < minHistBucketCount {
 			return fmt.Errorf(
-				"Invalid Hist Bucket Count (%d) - it must be >= %d",
+				"invalid Hist Bucket Count (%d) - it must be >= %d",
 				c, minHistBucketCount)
 		}
 
