@@ -112,7 +112,7 @@ func populateTestCache(s *Stat, init, incr float64, count int) {
 		count = cap(s.cache)
 	}
 
-	for i := 0; i < count; i++ {
+	for range count {
 		s.Add(v)
 		v += incr
 	}
@@ -216,7 +216,7 @@ func TestHist(t *testing.T) {
 		populateTestCache(s, tc.cacheInit, tc.cacheIncr, tc.cacheCount)
 
 		v := tc.init
-		for i := 0; i < tc.count; i++ {
+		for range tc.count {
 			s.Add(v)
 			v += tc.incr
 		}

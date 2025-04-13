@@ -491,11 +491,7 @@ func (s *Stat) initHist() {
 
 	if !s.histSizeChosen {
 		if s.count/len(s.hist) < minPerBucket {
-			newHistSize := int(s.count / minPerBucket)
-			if newHistSize < minHistBucketCount {
-				newHistSize = minHistBucketCount
-			}
-
+			newHistSize := max(int(s.count/minPerBucket), minHistBucketCount)
 			s.hist = s.hist[:newHistSize]
 		}
 	}
