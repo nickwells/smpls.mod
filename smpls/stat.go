@@ -219,24 +219,28 @@ func (s Stat) Hist() string {
 	overflowFmt := fromFmt + "     " + valSpace + ": %s\n"
 	stdFmt := fromFmt + " , " + toFmt + ": %s\n"
 
-	hist := "units: " + s.units + "\n"
-	hist += fmt.Sprintf(underflowFmt, s.bucketStart,
+	var hist strings.Builder
+
+	hist.WriteString("units: ")
+	hist.WriteString(s.units)
+	hist.WriteString("\n")
+	fmt.Fprintf(&hist, underflowFmt, s.bucketStart,
 		histValStr(s.underflow, s.count, countFmt))
 
 	minVal := s.bucketStart
 	maxVal := minVal + s.bucketWidth
 
 	for _, count := range s.hist {
-		hist += fmt.Sprintf(stdFmt, minVal, maxVal,
+		fmt.Fprintf(&hist, stdFmt, minVal, maxVal,
 			histValStr(count, s.count, countFmt))
 		minVal = maxVal
 		maxVal += s.bucketWidth
 	}
 
-	hist += fmt.Sprintf(overflowFmt, minVal,
+	fmt.Fprintf(&hist, overflowFmt, minVal,
 		histValStr(s.overflow, s.count, countFmt))
 
-	return hist
+	return hist.String()
 }
 
 // histValStr returns a string holding the formatted value. The value is
