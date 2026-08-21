@@ -163,7 +163,7 @@ func TestHist(t *testing.T) {
 			expLastBucketCount: 500 / dfltHistBucketCount,
 			expBucketStart:     180.0,
 			expBucketWidth: histBucketWidthScale *
-				(6.0 * (500 - 1)) / (dfltHistBucketCount),
+				(6.0 * (500 - 1)) / dfltHistBucketCount,
 		},
 		{
 			ID:                 testhelper.MkID("3 values below bucketStart"),
